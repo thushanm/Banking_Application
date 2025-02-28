@@ -6,14 +6,15 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="notification_Service" />
         <module name="user_Service" />
         <module name="security-audit_Service" />
-        <module name="account_Service" />
-        <module name="chatbot_Service" />
-        <module name="transaction_Service" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="chatbot_Service" target="23" />
+      <module name="notification_Service" target="23" />
+      <module name="transaction_Service" target="23" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">

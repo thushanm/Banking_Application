@@ -10,7 +10,15 @@
         <option value="$PROJECT_DIR$/transaction_Service/pom.xml" />
         <option value="$PROJECT_DIR$/notification_Service/pom.xml" />
         <option value="$PROJECT_DIR$/security-audit_Service/pom.xml" />
+        <option value="$PROJECT_DIR$/backend/account_Service/pom.xml" />
+        <option value="$PROJECT_DIR$/backend/user_Service/pom.xml" />
+        <option value="$PROJECT_DIR$/backend/security-audit_Service/pom.xml" />
       </list>
+    </option>
+    <option name="ignoredFiles">
+      <set>
+        <option value="$PROJECT_DIR$/backend/account_Service/pom.xml" />
+      </set>
     </option>
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_22" project-jdk-name="openjdk-23" project-jdk-type="JavaSDK">
