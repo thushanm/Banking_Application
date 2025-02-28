@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="notification_Service" />
+        <module name="user_Service" />
+        <module name="security-audit_Service" />
+        <module name="account_Service" />
+        <module name="chatbot_Service" />
+        <module name="transaction_Service" />
+      </profile>
+    </annotationProcessing>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="account_Service" options="-parameters" />
+      <module name="chatbot_Service" options="-parameters" />
+      <module name="notification_Service" options="-parameters" />
+      <module name="security-audit_Service" options="-parameters" />
+      <module name="transaction_Service" options="-parameters" />
+      <module name="user_Service" options="-parameters" />
+    </option>
+  </component>
+</project>
