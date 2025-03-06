@@ -1,30 +1,22 @@
-package com.thushan.authentication_Service.entity;
+package com.thushan.authentication_Service.dto;
 
-import jakarta.annotation.Nullable;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class UserDTO {
     private Long id;
-    @Column(unique = true,nullable = false)
     private String email;
     private String password;
     private String role;
     private boolean mfaEnabled;
     private String otp;
     private LocalDateTime otpExpiry;
-
 }

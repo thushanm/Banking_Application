@@ -1,6 +1,5 @@
-package com.thushan.authentication_Service.entity;
+package com.thushan.user_Service.entity;
 
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,22 +8,22 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(unique = true,nullable = false)
+    @Column(nullable = false,unique = true)
     private String email;
     private String password;
     private String role;
     private boolean mfaEnabled;
     private String otp;
-    private LocalDateTime otpExpiry;
+    private LocalDateTime otpExpiryDate;
 
 }
