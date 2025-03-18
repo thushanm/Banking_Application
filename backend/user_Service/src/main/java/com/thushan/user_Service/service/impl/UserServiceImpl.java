@@ -32,10 +32,12 @@ public class UserServiceImpl implements UserService {
     public String register(UserDTO userDTO) throws CustomException {
         log.info("Registering user: {}", userDTO.getEmail());
 
+        // Validate input
         if (userDTO.getEmail() == null || userDTO.getPassword() == null) {
             throw new CustomException("Email and password cannot be null.");
         }
 
+        // Check if user already exists
         if (userRepository.findByEmail(userDTO.getEmail()).isPresent()) {
             throw new CustomException("User with email " + userDTO.getEmail() + " already exists.");
         }
@@ -44,11 +46,33 @@ public class UserServiceImpl implements UserService {
         User user = new User();
         user.setEmail(userDTO.getEmail());
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        user.setMfaEnabled(userDTO.isMfaEnabled()); // Set MFA status
+
+        // Set default role
+        user.setRole("USER");
+
+        // Generate OTP if MFA is enabled
+        String otp = null;
+        if (user.isMfaEnabled()) {
+            otp = generateSecureOTP();
+            user.setOtp(otp);
+            user.setOtpExpiryDate(LocalDateTime.now().plusMinutes(5));
+        } else {
+            user.setOtp(null);
+            user.setOtpExpiryDate(null);
+        }
 
         try {
             log.info("Saving user to the database...");
-            userRepository.save(user);
+            userRepository.save(user);  // Save first to get user ID
+
             log.info("User saved successfully.");
+
+            // Send OTP email after saving the user
+            if (user.isMfaEnabled() && otp != null) {
+                sendOTPEmail(user.getEmail(), otp);
+            }
+
             return "User registered successfully.";
         } catch (Exception e) {
             log.error("Error occurred while saving user: {}", e.getMessage());
@@ -72,11 +96,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public String generateOTP(String email) throws CustomException {
-        log.info("Generating OTP for user: {}", email);
+    public String generateOTP(UserDTO userDTO) throws CustomException {
+        log.info("Generating OTP for user: {}", userDTO.getEmail());
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomException("User not found with email: " + email));
+        User user = userRepository.findByEmail(userDTO.getEmail())
+                .orElseThrow(() -> new CustomException("User not found with email: " + userDTO.getEmail()));
 
         String otp = generateSecureOTP();
         user.setOtp(otp);
@@ -84,7 +108,7 @@ public class UserServiceImpl implements UserService {
 
         try {
             userRepository.save(user);
-            sendOTPEmail(email, otp);
+            sendOTPEmail(user.getEmail(), otp);  // Now using `user.getEmail()`
             log.info("OTP generated and sent successfully.");
             return "OTP generated and sent successfully.";
         } catch (Exception e) {
