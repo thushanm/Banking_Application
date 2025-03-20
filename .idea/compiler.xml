@@ -17,6 +17,7 @@
         <processorPath useClasspath="false">
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/unknown/lombok-unknown.jar" />
         </processorPath>
+        <module name="otp_Service" />
         <module name="service_Discovery" />
         <module name="api-Gateway" />
       </profile>
@@ -36,6 +37,7 @@
       <module name="authentication_Service" options="-parameters" />
       <module name="chatbot_Service" options="-parameters" />
       <module name="notification_Service" options="-parameters" />
+      <module name="otp_Service" options="-parameters" />
       <module name="security-audit_Service" options="-parameters" />
       <module name="service_Discovery" options="-parameters" />
       <module name="transaction_Service" options="-parameters" />

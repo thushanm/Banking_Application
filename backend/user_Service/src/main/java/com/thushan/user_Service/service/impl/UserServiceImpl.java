@@ -127,7 +127,7 @@ public class UserServiceImpl implements UserService {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(email);
         message.setSubject("Your OTP Code");
-        message.setText("Your OTP is: " + otp + ". It will expire in 5 minutes.");
+        message.setText("Your OTP is: " + otp + ". It will expire in 5 minutes .");
 
         try {
             mailSender.send(message);
