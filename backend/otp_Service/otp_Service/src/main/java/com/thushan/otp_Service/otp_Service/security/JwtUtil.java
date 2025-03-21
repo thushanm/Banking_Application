@@ -20,11 +20,5 @@ public class JwtUtil {
                 .compact();
     }
 
-    public String getEmailFromToken(String token) {
-        return Jwts.parser()
-                .setSigningKey(SECRET_KEY)
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
-    }
+
 }

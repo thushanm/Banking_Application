@@ -23,7 +23,6 @@ public class User {
     private String password;
     private String role;
     private boolean mfaEnabled;
-    private String otp;
-    private LocalDateTime otpExpiryDate;
+
 
 }
