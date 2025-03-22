@@ -14,5 +14,5 @@ COPY target/user-service.jar user-service.jar
 # Expose the port
 EXPOSE 8080
 
-# Run the application
+# Run the applications
 CMD ["java", "-jar", "user-service.jar"]
