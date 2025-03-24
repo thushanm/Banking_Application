@@ -1,18 +1,17 @@
-FROM ubuntu:latest
-LABEL authors="D.Thushan Madushara"
-
-ENTRYPOINT ["top", "-b"]
-# Use OpenJDK 21
+# Use OpenJDK 21 slim image
 FROM openjdk:21-jdk-slim
+
+# Set metadata
+LABEL authors="D.Thushan Madushara"
 
 # Set working directory
 WORKDIR /app
 
-# Copy JAR file
+# Copy the JAR file into the container
 COPY target/otp-service.jar otp-service.jar
 
-# Expose the port
+# Expose the port for the service
 EXPOSE 8081
 
 # Run the application
-CMD ["java", "-jar", "otp-service.jar"]
+ENTRYPOINT ["java", "-jar", "otp-service.jar"]

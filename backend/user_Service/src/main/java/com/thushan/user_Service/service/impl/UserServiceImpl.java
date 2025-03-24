@@ -48,37 +48,40 @@ private KafkaTemplate<String, Object> kafkaTemplate;
 
     @Override
     @Transactional
-    public String validateOTP(String email, String password,String otp) {
-        log.info("Validate OTP for user : {}",email);
+    public String validateOTP(String email, String password, String otp) {
+        log.info("Validating OTP for user: {}", email);
+
+        // Ensure Kafka topic format is correct
+        kafkaTemplate.send("otp_request", email);
+
         CompletableFuture<Boolean> otpFuture = new CompletableFuture<>();
         futures.put(email, otpFuture);
-        kafkaTemplate.send("otp_request", email + ":" + otp);
 
         try {
             Boolean isValidOTP = otpFuture.get(10, TimeUnit.SECONDS);
-            if (!isValidOTP ){
-                throw new CustomException("Invalid OTP Or Expire");
+            if (!isValidOTP) {
+                throw new CustomException("Invalid OTP or Expired");
             }
-        }catch (Exception e){
-            throw new CustomException("Invalid OTP"+e.getMessage());
-        }finally {
+        } catch (Exception e) {
+            throw new CustomException("OTP validation failed: " + e.getMessage());
+        } finally {
             futures.remove(email);
         }
-        String encodePassword = passwordEncoder.encode(password);
+
+        // Register user after OTP validation
         User user = new User();
         user.setEmail(email);
-        user.setPassword(encodePassword);
+        user.setPassword(passwordEncoder.encode(password));
         user.setRole("USER");
         user.setMfaEnabled(true);
         userRepository.save(user);
-        log.info("User register completed successfully for:{}",email);
 
+        log.info("User registered successfully: {}", email);
         String token = jwtUtil.generateToken(email);
 
-        return "user registered successfully.Token: "+token;
-
-
+        return "User registered successfully. Token: " + token;
     }
+
     @KafkaListener(topics = "otp_request", groupId = "otp_sender")
     public void handleOtpValidationResponse(String message) {
         String[] parts = message.split(":");
