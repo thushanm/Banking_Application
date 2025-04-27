@@ -16,8 +16,8 @@ public class OtpKafkaConsumer {
     private final OTPService otpService;
 
     @KafkaListener(topics = "otp_request", groupId = "otp_sender")
-    public void processOTPRequest(String email) {
-        log.info(" Received OTP request for email: {}", email);
+    public void processOTPRequest(String email,String otp) {
+        log.info(" Received OTP request for email: {}", email,otp);
 
         if (email == null || email.trim().isEmpty()) {
             log.error(" Received an invalid OTP request: Email is null or empty.");
@@ -25,9 +25,9 @@ public class OtpKafkaConsumer {
         }
 
         try {
-            OTPRequestDTO requestDTO = new OTPRequestDTO(email);
+            OTPRequestDTO requestDTO = new OTPRequestDTO(email,otp);
             otpService.genarateOTP(requestDTO);
-            log.info(" OTP generated successfully for {}", email);
+            log.info(" OTP generated successfully for {}", email,otp);
         } catch (Exception e) {
             log.error(" Error processing OTP request for {}: {}", email, e.getMessage(), e);
         }

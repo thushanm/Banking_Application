@@ -1,5 +1,7 @@
 package com.thushan.user_Service.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thushan.user_Service.dto.UserDTO;
 import com.thushan.user_Service.entity.User;
 import com.thushan.user_Service.exceptions.CustomException;
@@ -9,89 +11,89 @@ import com.thushan.user_Service.security.JwtUtil;
 import com.thushan.user_Service.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.SecureRandom;
-import java.time.LocalDateTime;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class UserServiceImpl implements UserService {
-private final UserRepository userRepository;
-private final PasswordEncoder passwordEncoder;
-private final JwtUtil jwtUtil;
-private KafkaTemplate<String, Object> kafkaTemplate;
 
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
+    private final ValueOperations<String, String> valueOperations;
     private final OtpKafkaProducer otpKafkaProducer;
-    private final ConcurrentHashMap<String,CompletableFuture<Boolean>> futures = new ConcurrentHashMap<>();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     @Transactional
     public String register(UserDTO userDTO) throws CustomException {
-        log.info("initiating registration of user {}", userDTO.getEmail());
+        log.info("Initiating registration of user {}", userDTO.getEmail());
 
-        otpKafkaProducer.otpRequestSend(userDTO.getEmail());
+        storeUserDataInRedis(userDTO);
 
-        return "OTP sent to email. Please verify to complete registration.";
+        otpKafkaProducer.sendOtpRequest(userDTO.getEmail());
+        log.info("OTP request sent to {}", userDTO.getEmail());
 
+        return "OTP sent successfully to " + userDTO.getEmail();
+    }
+
+    private void storeUserDataInRedis(UserDTO userDTO) throws CustomException {
+        try {
+            String userJson = objectMapper.writeValueAsString(userDTO);
+            valueOperations.set("pending_userData:" + userDTO.getEmail(), userJson, 10, TimeUnit.MINUTES);
+            log.info("User data stored in Redis for {}", userDTO.getEmail());
+        } catch (JsonProcessingException e) {
+            throw new CustomException("Failed to store user data in Redis");
+        }
     }
 
     @Override
     @Transactional
-    public String validateOTP(String email, String password, String otp) {
-        log.info("Validating OTP for user: {}", email);
+    public void saveUserToDatabase(String email) throws CustomException {
+        String redisKey = "pending_userData:" + email;
+        String storedUserJson = valueOperations.get(redisKey);
 
-        // Ensure Kafka topic format is correct
-        kafkaTemplate.send("otp_request", email);
-
-        CompletableFuture<Boolean> otpFuture = new CompletableFuture<>();
-        futures.put(email, otpFuture);
+        if (storedUserJson == null) {
+            log.error("No pending user data found in Redis for key: {}", redisKey);
+            throw new CustomException("User data expired or missing. Please restart registration.");
+        }
 
         try {
-            Boolean isValidOTP = otpFuture.get(10, TimeUnit.SECONDS);
-            if (!isValidOTP) {
-                throw new CustomException("Invalid OTP or Expired");
-            }
+            log.info("User data retrieved from Redis for email: {}", email); // Debugging log
+            UserDTO storedUserDTO = objectMapper.readValue(storedUserJson, UserDTO.class);
+
+            log.info("UserDTO: {}", storedUserDTO);
+
+            User user = new User();
+            user.setEmail(storedUserDTO.getEmail());
+            user.setPassword(passwordEncoder.encode(storedUserDTO.getPassword()));
+            user.setRole(storedUserDTO.getRole());
+            user.setMfaEnabled(true);
+
+            log.info("Saving user to database: {}", user);
+            userRepository.save(user);
+            log.info("User saved to database successfully: {}", user.getEmail());
         } catch (Exception e) {
-            throw new CustomException("OTP validation failed: " + e.getMessage());
-        } finally {
-            futures.remove(email);
+            log.error("Failed to save user to database", e);
+            throw new CustomException("Failed to save user to database: " + e.getMessage());
         }
-
-        // Register user after OTP validation
-        User user = new User();
-        user.setEmail(email);
-        user.setPassword(passwordEncoder.encode(password));
-        user.setRole("USER");
-        user.setMfaEnabled(true);
-        userRepository.save(user);
-
-        log.info("User registered successfully: {}", email);
-        String token = jwtUtil.generateToken(email);
-
-        return "User registered successfully. Token: " + token;
     }
 
-    @KafkaListener(topics = "otp_request", groupId = "otp_sender")
-    public void handleOtpValidationResponse(String message) {
-        String[] parts = message.split(":");
-        String email = parts[0];
-        boolean isValid = Boolean.parseBoolean(parts[1]);
 
+    @Override
+    public String getOtpFromRedis(String email) {
+        return valueOperations.get("otp:" + email);
+    }
 
-        CompletableFuture<Boolean> otpFuture = futures.get(email);
-        if (otpFuture != null) {
-            otpFuture.complete(isValid);
-        }
+    @Override
+    public void sendOtpValidationResult(String email, boolean result) {
+        String validationResult = email + ":" + result;
+        otpKafkaProducer.sendOtpValidationResult(validationResult);
     }
 }

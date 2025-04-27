@@ -9,18 +9,16 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Slf4j
 public class OtpKafkaProducer {
+
     private final KafkaTemplate<String, String> kafkaTemplate;
 
-    public void otpRequestSend(String email) {
-        try {
-            kafkaTemplate.send("otp_request", email)
-                    .thenAccept(result -> log.info(" Successfully sent OTP request for email: {}", email))
-                    .exceptionally(ex -> {
-                        log.error(" Failed to send OTP request for email: {}", email, ex);
-                        return null;
-                    });
-        } catch (Exception ex) {
-            log.error(" Unexpected failure sending OTP request for email: {}", email, ex);
-        }
+    public void sendOtpRequest(String email) {
+        kafkaTemplate.send("otp_request", email);
+        log.info("OTP request sent to Kafka for {}", email);
+    }
+
+    public void sendOtpValidationResult(String validationResult) {
+        kafkaTemplate.send("otp_response", validationResult);
+        log.info("OTP validation result sent to Kafka: {}", validationResult);
     }
 }

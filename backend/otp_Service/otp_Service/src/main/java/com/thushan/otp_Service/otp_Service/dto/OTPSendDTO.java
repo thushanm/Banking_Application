@@ -9,9 +9,6 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class OTPRequestDTO {
-    private String otp;
+public class OTPSendDTO {
     private String email;
-
-
 }

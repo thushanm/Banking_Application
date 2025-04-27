@@ -1,4 +1,4 @@
-package com.thushan.otp_Service.otp_Service.dto;
+package com.thushan.user_Service.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,6 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class OTPResponseDTO {
-    private String massage;
+public class OTPResponse {
+    private String email;
+    private String otp;
 }
