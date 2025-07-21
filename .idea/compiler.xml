@@ -7,9 +7,10 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="otp_Service" />
         <module name="user_Service" />
         <module name="security-audit_Service" />
+        <module name="otp_Service" />
+        <module name="account_Service" />
       </profile>
       <profile name="Annotation profile for service_Discovery" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -23,7 +24,6 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="account_Service" target="23" />
       <module name="authentication_Service" target="21" />
       <module name="chatbot_Service" target="23" />
       <module name="notification_Service" target="23" />

@@ -20,10 +20,10 @@ public class RedisConfig {
     @Value("${spring.data.redis.port}")
     private int redisPort;
 
-    @Value("${spring.data.redis.username:default}")  // Default user (if ACL is enabled)
+    @Value("${spring.data.redis.username:default}")
     private String redisUsername;
 
-    @Value("${spring.data.redis.password:1234}") // Redis password
+    @Value("${spring.data.redis.password:1234}")
     private String redisPassword;
 
     @Bean
@@ -31,7 +31,7 @@ public class RedisConfig {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
         config.setHostName(redisHost);
         config.setPort(redisPort);
-        config.setUsername(redisUsername); // Only required if ACL is enabled
+        config.setUsername(redisUsername);
         config.setPassword(RedisPassword.of(redisPassword));
 
         return new LettuceConnectionFactory(config);
