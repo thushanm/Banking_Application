@@ -1,21 +1,21 @@
-
 spring:
   application:
-    name: account_Service
-
+    name: account-service
 
   datasource:
-    url: jdbc:mysql://localhost:3306/account_service_db
+    url: jdbc:mysql://localhost:3306/banks_db?createDatabaseIfNotExist=true
     username: root
     password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
 
-
   jpa:
     database-platform: org.hibernate.dialect.MySQL8Dialect
     hibernate:
-      ddl-auto: create
+      ddl-auto: update # Use 'update' to avoid dropping the schema on restart
     show-sql: true
     properties:
       hibernate:
         format_sql: true
+
+server:
+  port: 8083
