@@ -22,6 +22,11 @@ public class Account {
 
     @Column(nullable = false, unique = true)
     private String accountNumber;
+    @Column(nullable = false)
+    private String holderName;
+
+    @Column(nullable = false, unique = true)
+    private String nicNo;
 
     @Column(nullable = false)
     private BigDecimal balance;
