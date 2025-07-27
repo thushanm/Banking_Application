@@ -25,7 +25,9 @@ public class Account {
 
     @Column(nullable = false)
     private BigDecimal balance;
+    @Column(nullable = false)
+    private BigDecimal interest;
 
     @Column(nullable = false, unique = true)
-    private Long userId; // Links to the User in user_Service
+    private Long userId;
 }

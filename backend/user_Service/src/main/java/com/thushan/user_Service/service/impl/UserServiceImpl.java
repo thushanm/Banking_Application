@@ -79,6 +79,8 @@ public class UserServiceImpl implements UserService {
             log.info("Saving user to database: {}", user);
             userRepository.save(user);
             log.info("User saved to database successfully: {}", user.getEmail());
+            otpKafkaProducer.sendUserId(user.getId());
+            valueOperations.getOperations().delete(redisKey);
         } catch (Exception e) {
             log.error("Failed to save user to database", e);
             throw new CustomException("Failed to save user to database: " + e.getMessage());

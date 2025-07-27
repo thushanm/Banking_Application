@@ -21,4 +21,9 @@ public class OtpKafkaProducer {
         kafkaTemplate.send("otp_response", validationResult);
         log.info("OTP validation result sent to Kafka: {}", validationResult);
     }
+    public void sendUserId(Long userId) {
+
+        kafkaTemplate.send("user_create_topic", String.valueOf(userId));
+        log.info("User id sent to Kafka for {}", userId);
+    }
 }

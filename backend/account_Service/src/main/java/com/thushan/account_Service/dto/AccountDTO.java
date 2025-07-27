@@ -14,5 +14,6 @@ public class AccountDTO {
     private Long id;
     private String accountNumber;
     private BigDecimal balance;
+    private BigDecimal interest;
     private Long userId;
 }
