@@ -11,6 +11,7 @@
         <module name="security-audit_Service" />
         <module name="otp_Service" />
         <module name="account_Service" />
+        <module name="transaction_Service" />
       </profile>
       <profile name="Annotation profile for service_Discovery" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -27,7 +28,6 @@
       <module name="authentication_Service" target="21" />
       <module name="chatbot_Service" target="23" />
       <module name="notification_Service" target="23" />
-      <module name="transaction_Service" target="23" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">

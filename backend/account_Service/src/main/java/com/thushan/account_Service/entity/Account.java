@@ -28,6 +28,10 @@ public class Account {
     @Column(nullable = false, unique = true)
     private String nicNo;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, unique = true)
+    private AccessType accountType;
+
     @Column(nullable = false)
     private BigDecimal balance;
     @Column(nullable = false)
