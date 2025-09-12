@@ -2,7 +2,7 @@ package com.thushan.transaction._Service.service.impl;
 
 
 
-
+import com.thushan.transaction._Service.client.AccountServiceClient;
 import com.thushan.transaction._Service.dto.TransactionDTO;
 import com.thushan.transaction._Service.dto.TransferRequestDTO;
 import com.thushan.transaction._Service.entity.Transaction;
@@ -14,6 +14,7 @@ import com.thushan.transaction._Service.service.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,10 +25,12 @@ import java.util.stream.Collectors;
 public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;
+    private final AccountServiceClient accountServiceClient;
     private final TransactionKafkaProducer kafkaProducer;
     private final ModelMapper modelMapper;
 
     @Override
+    @Transactional
     public TransactionDTO createTransaction(TransferRequestDTO transferRequestDTO) {
         Transaction transaction = new Transaction();
         transaction.setFromAccount(transferRequestDTO.getFromAccount());
@@ -35,7 +38,14 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setAmount(transferRequestDTO.getAmount());
         transaction.setTimestamp(LocalDateTime.now());
         transaction.setType(TransactionType.TRANSFER);
-        transaction.setStatus(TransactionStatus.PENDING);
+
+        try {
+            accountServiceClient.updateBalance(transferRequestDTO.getFromAccount(), transferRequestDTO.getAmount().negate());
+            accountServiceClient.updateBalance(transferRequestDTO.getToAccount(), transferRequestDTO.getAmount());
+            transaction.setStatus(TransactionStatus.COMPLETED);
+        } catch (Exception e) {
+            transaction.setStatus(TransactionStatus.FAILED);
+        }
 
         Transaction savedTransaction = transactionRepository.save(transaction);
         kafkaProducer.sendTransactionEvent("New transaction created: " + savedTransaction.getId());

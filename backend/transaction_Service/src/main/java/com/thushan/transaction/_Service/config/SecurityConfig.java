@@ -1,6 +1,7 @@
 package com.thushan.transaction._Service.config;
 
 
+import com.thushan.transaction._Service.security.JwtRequestFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

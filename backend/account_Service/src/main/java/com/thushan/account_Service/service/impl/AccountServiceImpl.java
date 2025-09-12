@@ -42,6 +42,21 @@ public class AccountServiceImpl implements AccountService {
         return modelMapper.map(account, AccountDTO.class);
     }
 
+    @Override
+    @Transactional
+    public void updateBalance(String accountNumber, BigDecimal amount) throws CustomException {
+        Account account = accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new CustomException("Account not found: " + accountNumber));
+
+        BigDecimal newBalance = account.getBalance().add(amount);
+        if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
+            throw new CustomException("Insufficient funds.");
+        }
+
+        account.setBalance(newBalance);
+        accountRepository.save(account);
+    }
+
     private String generateUniqueAccountNumber() {
         String accountNumber;
         do {
@@ -50,4 +65,3 @@ public class AccountServiceImpl implements AccountService {
         return accountNumber;
     }
 }
-
