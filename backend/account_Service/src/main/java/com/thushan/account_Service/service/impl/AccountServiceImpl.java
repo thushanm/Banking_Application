@@ -1,7 +1,7 @@
 package com.thushan.account_Service.service.impl;
-
 import com.thushan.account_Service.dto.AccountDTO;
 import com.thushan.account_Service.entity.Account;
+import com.thushan.account_Service.Enumaration.AccountType;
 import com.thushan.account_Service.exception.CustomException;
 import com.thushan.account_Service.repository.AccountRepository;
 import com.thushan.account_Service.service.AccountService;
@@ -21,14 +21,27 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional
-    public AccountDTO createAccount(Long userId) throws CustomException {
+    public AccountDTO createAccount(Long userId, AccountDTO accountDetails) throws CustomException {
+
         if (accountRepository.findByUserId(userId).isPresent()) {
             throw new CustomException("User already has an account.");
         }
 
+        if (accountDetails.getHolderName() == null || accountDetails.getNicNo() == null || accountDetails.getAccountType() == null) {
+            throw new CustomException("Holder name, NIC, and account type are required.");
+        }
+
         Account account = new Account();
         account.setUserId(userId);
+        account.setHolderName(accountDetails.getHolderName());
+        account.setNicNo(accountDetails.getNicNo());
+
+
+        account.setAccountType(accountDetails.getAccountType());
+
+
         account.setBalance(BigDecimal.ZERO);
+        account.setInterest(BigDecimal.valueOf(0.02));
         account.setAccountNumber(generateUniqueAccountNumber());
 
         Account savedAccount = accountRepository.save(account);
@@ -46,9 +59,10 @@ public class AccountServiceImpl implements AccountService {
     @Transactional
     public void updateBalance(String accountNumber, BigDecimal amount) throws CustomException {
         Account account = accountRepository.findByAccountNumber(accountNumber)
-                .orElseThrow(() -> new CustomException("Account not found: " + accountNumber));
+                .orElseThrow(() -> new CustomException("Account not found with account number: " + accountNumber));
 
         BigDecimal newBalance = account.getBalance().add(amount);
+        // Ensure the balance does not drop below zero.
         if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
             throw new CustomException("Insufficient funds.");
         }
@@ -58,9 +72,12 @@ public class AccountServiceImpl implements AccountService {
     }
 
     private String generateUniqueAccountNumber() {
+        Random random = new Random();
         String accountNumber;
         do {
-            accountNumber = String.format("%010d", new Random().nextLong(1_000_000_000L));
+
+            long number = random.nextLong(1_000_000_000L);
+            accountNumber = String.format("%010d", number);
         } while (accountRepository.findByAccountNumber(accountNumber).isPresent());
         return accountNumber;
     }

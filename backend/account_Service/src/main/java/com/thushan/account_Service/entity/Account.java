@@ -1,6 +1,7 @@
 package com.thushan.account_Service.entity;
 
 
+import com.thushan.account_Service.Enumaration.AccountType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,8 +30,8 @@ public class Account {
     private String nicNo;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, unique = true)
-    private AccessType accountType;
+    @Column(nullable = false)
+    private AccountType accountType;
 
     @Column(nullable = false)
     private BigDecimal balance;
