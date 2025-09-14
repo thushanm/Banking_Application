@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
@@ -31,7 +33,7 @@ public class UserController {
 
         if (storedOtp != null && storedOtp.equals(otpResponse.getOtp())) {
             try {
-                // OTP is valid, now save the user to the database
+
                 userService.saveUserToDatabase(otpResponse.getEmail());
                 return ResponseEntity.ok("OTP is valid. User registered successfully.");
             } catch (CustomException e) {
@@ -40,6 +42,11 @@ public class UserController {
         } else {
             return ResponseEntity.status(401).body("Invalid or expired OTP.");
         }
+    }
+    @GetMapping("/users")
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
+        List<UserDTO> users = userService.getAllUsers();
+        return ResponseEntity.ok(users);
     }
 
 }

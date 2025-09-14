@@ -25,6 +25,7 @@ public class AccountController {
             AccountDTO newAccount = accountService.createAccount(userId, accountDetails);
             return ResponseEntity.status(201).body(newAccount);
         } catch (CustomException e) {
+            log.error("Error creating account for userId {}: {}", userId, e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -35,6 +36,7 @@ public class AccountController {
             AccountDTO account = accountService.getAccountByUserId(userId);
             return ResponseEntity.ok(account);
         } catch (CustomException e) {
+            log.error("Error fetching account for userId {}: {}", userId, e.getMessage());
             return ResponseEntity.status(404).body(e.getMessage());
         }
     }
@@ -45,8 +47,8 @@ public class AccountController {
             accountService.updateBalance(accountNumber, amount);
             return ResponseEntity.ok().build();
         } catch (CustomException e) {
+            log.error("Error updating balance for account {}: {}", accountNumber, e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }
-

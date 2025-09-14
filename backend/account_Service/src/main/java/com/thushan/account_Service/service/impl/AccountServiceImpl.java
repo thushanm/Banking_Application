@@ -35,12 +35,8 @@ public class AccountServiceImpl implements AccountService {
         account.setUserId(userId);
         account.setHolderName(accountDetails.getHolderName());
         account.setNicNo(accountDetails.getNicNo());
-
-
         account.setAccountType(accountDetails.getAccountType());
-
-
-        account.setBalance(BigDecimal.ZERO);
+        account.setBalance(accountDetails.getBalance());
         account.setInterest(BigDecimal.valueOf(0.02));
         account.setAccountNumber(generateUniqueAccountNumber());
 
@@ -62,7 +58,6 @@ public class AccountServiceImpl implements AccountService {
                 .orElseThrow(() -> new CustomException("Account not found with account number: " + accountNumber));
 
         BigDecimal newBalance = account.getBalance().add(amount);
-        // Ensure the balance does not drop below zero.
         if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
             throw new CustomException("Insufficient funds.");
         }
@@ -75,9 +70,8 @@ public class AccountServiceImpl implements AccountService {
         Random random = new Random();
         String accountNumber;
         do {
-
-            long number = random.nextLong(1_000_000_000L);
-            accountNumber = String.format("%010d", number);
+            long number = 1_000_000_000L + random.nextLong(9_000_000_000L); // Generates a 10-digit number
+            accountNumber = String.valueOf(number);
         } while (accountRepository.findByAccountNumber(accountNumber).isPresent());
         return accountNumber;
     }

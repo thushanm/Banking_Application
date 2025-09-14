@@ -11,12 +11,15 @@ import com.thushan.user_Service.security.JwtUtil;
 import com.thushan.user_Service.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +32,8 @@ public class UserServiceImpl implements UserService {
     private final ValueOperations<String, String> valueOperations;
     private final OtpKafkaProducer otpKafkaProducer;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ModelMapper modelMapper;
+
 
     @Override
     @Transactional
@@ -97,5 +102,13 @@ public class UserServiceImpl implements UserService {
     public void sendOtpValidationResult(String email, boolean result) {
         String validationResult = email + ":" + result;
         otpKafkaProducer.sendOtpValidationResult(validationResult);
+    }
+
+    @Override
+    public List<UserDTO> getAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(user -> modelMapper.map(user, UserDTO.class))
+                .collect(Collectors.toList());
     }
 }
